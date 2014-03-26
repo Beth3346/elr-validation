@@ -1,532 +1,595 @@
 ###############################################################################
 # Client-side form validation
 ###############################################################################
+###
+jshint -W100
+###
+"use strict"
 
 ( ($) ->
-
-    drmForms = {
-
-        config: {
-            speed: 300
-        }
-
-        init: (config) ->
-            $.extend @.config, config
+    class DrmForms
+        constructor: (@speed = 300) ->
+            self = @
             body = $ 'body'
+
+            validateField = (value, validate) ->
+                if validate.message isnt null
+                    self.issueNotice.call @, validate.status, validate.message, validate.issuer, self.speed
+                else
+                    self.removeNotice.call @, validate.issuer, self.speed
+                self.removeValidationClass.call @, validate.status
+                self.applyValidationClass.call @, validate.status
 
             body.on 'click', ':disabled', (e) ->
                 e.preventDefault()
 
-            body.on 'keyup', '.drm-valid-integer', @validateInteger
-            body.on 'keyup', '.drm-valid-number', @validateNumber
-            body.on 'keyup', '.drm-valid-url', @validateURL
-            body.on 'keyup', '.drm-valid-phone', @validatePhone
-            body.on 'keyup', '.drm-valid-email', @validateEmail
-            body.on 'keyup', '.drm-valid-full-name', @validateFullName
-            body.on 'keyup', '.drm-valid-alpha', @validateAlpha
-            body.on 'keyup', '.drm-valid-alphanum', @validateAlphaNum
-            body.on 'keyup', '.drm-valid-alphadash', @validateAlphaNumDash
-            body.on 'keyup', '.drm-valid-alpha-num-underscore', @validateAlphaNumUnderscore
-            body.on 'keyup', '.drm-valid-no-spaces', @validateNoSpaces
-            body.on 'keyup', '.drm-valid-no-tags', @validateNoTags
-            body.on 'keyup', '[required]', @validateRequired
-            body.on 'keyup', ':input[data-max-value]:not([data-min-value])', @validateMaxValue
-            body.on 'keyup', ':input[data-min-value]:not([data-max-value])', @validateMinValue
-            body.on 'keyup', ':input[data-max-length]:not([data-min-length])', @validateMaxLength
-            body.on 'keyup', ':input[data-min-length]:not([data-max-length])', @validateMinLength
-            body.on 'keyup', ':input[data-min-value][data-max-value]', @validateBetweenValue
-            body.on 'keyup', ':input[data-min-length][data-max-length]', @validateBetweenLength
-            body.on 'keyup', ':input', @trackLength
-            body.on 'blur', ':input:not([required])', @validateEmpty
+            body.on 'keyup', ':input.drm-valid-integer', ->
+                value = self.getValue.call @
+                validate = self.validateInteger value
+                validateField.call @, value, validate
 
-        success: ->
-            that = $ @
-            drmForms.removeValidationClass.call that
-            that.addClass 'drm-form-success'
+            body.on 'keyup', ':input.drm-valid-number', ->
+                value = self.getValue.call @
+                validate = self.validateNumber value
+                validateField.call @, value, validate
 
-        warning: ->
-            that = $ @
-            drmForms.removeValidationClass.call that
-            that.addClass 'drm-form-warning'
+            body.on 'keyup', ':input.drm-valid-url', ->
+                value = self.getValue.call @
+                validate = self.validateURL value
+                validateField.call @, value, validate
 
-        danger: ->
-            that = $ @
-            drmForms.removeValidationClass.call that
-            that.addClass 'drm-form-danger'
+            body.on 'keyup', ':input.drm-valid-phone', ->
+                value = self.getValue.call @
+                validate = self.validatePhone value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-email', ->
+                value = self.getValue.call @
+                validate = self.validateEmail value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-full-name', ->
+                value = self.getValue.call @
+                validate = self.validateFullName value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-alpha', ->
+                value = self.getValue.call @
+                validate = self.validateAlpha value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-alphanum', ->
+                value = self.getValue.call @
+                validate = self.validateAlphaNum value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-alphadash', ->
+                value = self.getValue.call @
+                validate = self.validateAlphaNumDash value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-alpha-num-underscore', ->
+                value = self.getValue.call @
+                validate = self.validateAlphaNumUnderscore value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-no-spaces', ->
+                value = self.getValue.call @
+                validate = self.validateNoSpaces value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input.drm-valid-no-tags', ->
+                value = self.getValue.call @
+                validate = self.validateNoTags value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-max-value]:not([data-min-value])', ->
+                value = self.getValue.call @
+                validate = self.validateMaxValue value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-min-value]:not([data-max-value])', ->
+                value = self.getValue.call @
+                validate = self.validateMinValue value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-max-length]:not([data-min-length])', ->
+                value = self.getValue.call @
+                validate = self.validateMaxLength value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-min-length]:not([data-max-length])', ->
+                value = self.getValue.call @
+                validate = self.validateMinLength value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-min-value][data-max-value]', ->
+                value = self.getValue.call @
+                validate = self.validateBetweenValue value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input[data-min-length][data-max-length]', ->
+                value = self.getValue.call @
+                validate = self.validateBetweenLength value
+                validateField.call @, value, validate            
+            
+            body.on 'keyup', ':input', self.trackLength
+
+            body.on 'keyup', '[required]', -> 
+                value = self.getValue.call @
+                validate = self.validateRequired value
+                validateField.call @, value, validate
+
+            body.on 'blur', ':input:not([required])', ->
+                value = self.getValue.call @
+                if not value
+                    self.removeValidationClass.call @
+                    self.removeAllNotices.call @
 
         trackLength: ->
             that = $ @
             value = $.trim that.val()
             length = value.length
-            lengthNotice = $ ".form-length-notice"
+            lengthNotice = that.nextUntil ':input', '.form-length-notice'
+            
             createMessage = (length) ->
-                message = if length == 1 then "#{length} character" else "#{length} characters"
-                return message
+                message = if length is 1 then "#{length} character" else "#{length} characters"
+                message
 
-            if lengthNotice.length == 0
-                message = createMessage(length)
-                lengthNotice = $ '<p></p>', {
+            if lengthNotice.length is 0
+                message = createMessage length
+                lengthNotice = $ '<p></p>',
                     text: message
                     class: 'form-length-notice'
-                }
                 
                 lengthNotice.hide().insertAfter(that).show()
-            else if length == 0
+            else if length is 0
                 lengthNotice.remove()
             else
-                message = createMessage(length)
+                message = createMessage length
                 lengthNotice.text message
 
-        issueNotice: (status, message) ->
+        getValue: ->
+            value = $.trim $(@).val()
+            value
+
+        issueNotice: (status, message, issuer, speed) ->
             that = $ @
-            notice = $ ".form-#{status}-notice:contains(#{message})"
+            notice = $ "p.form-#{status}-notice:contains(#{message})"
             
-            if notice.length == 0
-                notice = $ '<p></p>', {
+            if notice.length is 0
+                notice = $ '<p></p>',
                     text: message,
                     class: "form-#{status}-notice"
-                }
+                    'data-issuer': issuer
                 
-                notice.hide().insertAfter(that).slideDown drmForms.config.speed
+                notice.hide().insertAfter(that).slideDown speed
 
-        removeNotice: (status, message) ->
-            notice = $ ".form-#{status}-notice:contains(#{message})"
-            notice.slideUp drmForms.config.speed, -> 
-                $(@).remove()  
+        removeNotice: (issuer, speed) ->
+            notice = $ "p[data-issuer='#{issuer}']"
+            notice.slideUp speed, -> 
+                $(@).remove()
 
         removeAllNotices: ->
             that = $ @
-            notices = that.nextUntil(':input','.form-success-notice, .form-warning-notice, .form-danger-notice')
-            notices.slideUp drmForms.config.speed, -> 
-                $(@).remove()          
+            notices = that.nextUntil ':input','p.form-success-notice, p.form-warning-notice, p.form-danger-notice'
+            notices.slideUp @speed, -> 
+                $(@).remove()  
 
         applyValidationClass: (status) ->
             that = $ @
             switch status
-                when 'danger' then drmForms.danger.call that
-                when 'warning' then drmForms.warning.call that
-                when 'success' then drmForms.success.call that
+                when 'danger' then that.addClass 'drm-form-danger' 
+                when 'warning' then that.addClass 'drm-form-warning'
+                when 'success' then that.addClass 'drm-form-success'
 
-        removeValidationClass: ->
+        removeValidationClass: (status) ->
             that = $ @
-            that.removeClass 'drm-form-danger'
-            that.removeClass 'drm-form-warning'
-            that.removeClass 'drm-form-success'
+
+            switch status
+                when 'danger'
+                    that.removeClass 'drm-form-warning'
+                    that.removeClass 'drm-form-success'
+                when 'warning'
+                    that.removeClass 'drm-form-danger'
+                    that.removeClass 'drm-form-success'
+                when 'success'
+                    that.removeClass 'drm-form-danger'
+                    that.removeClass 'drm-form-warning'
+                else
+                    that.removeClass 'drm-form-danger'
+                    that.removeClass 'drm-form-warning'
+                    that.removeClass 'drm-form-success'
 
         validateEmpty: ->
             that = $ @
             value = $.trim that.val()
 
-            if !value
-                drmForms.removeValidationClass.call that
-                drmForms.removeAllNotices.call that
+            if not value
+                @removeValidationClass.call that
+                @removeAllNotices.call that
 
-        validateRequired: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            message = 'this field is required'
+        validateRequired: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'required'
 
-            if value.length == 0
-                status = 'danger'
-                drmForms.issueNotice.call(that, status, message)
-            else
-                drmForms.removeNotice('danger', message)
+            if value.length is 0
+                validate.message = 'this field is required'
+                validate.status = 'danger'
+            
+            validate
 
-            drmForms.applyValidationClass.call(that, status)
-
-        validateInteger: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
+        validateInteger: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'integer'
             # an integer can be negative or positive and can include one comma separator followed by exactly 3 numbers
             re = new RegExp "^\\-?\\d*"
 
             evaluate = (result, value) ->
-                message = 'please enter a valid integer'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.message = 'please enter a valid integer'
+                    validate.status = 'danger'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateNumber: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
+        validateNumber: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'number'
             re = new RegExp "^\\-?\\d*\\.?\\d*"
 
             evaluate = (result, value) ->
-                message = 'please enter a valid number'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.message = 'please enter a valid number'
+                    validate.status = 'danger'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)       
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value      
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateURL: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^https?:\\/\\/[\\da-z\\.\\-]+[\\.a-z]{2,6}[\\/\\w/.\\-]*\\/?$','gi')
+        validateURL: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'url'
+            re = new RegExp '^https?:\\/\\/[\\da-z\\.\\-]+[\\.a-z]{2,6}[\\/\\w/.\\-]*\\/?$','gi'
 
             evaluate = (result, value) ->
-                message = 'please enter a valid url'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please enter a valid url'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)        
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value       
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateEmail: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^[a-z][a-z\\-\\_\\.\\d]*@[a-z\\-\\_\\.\\d]*\\.[a-z]{2,6}$','gi')
+        validateEmail: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'email'
+            re = new RegExp '^[a-z][a-z\\-\\_\\.\\d]*@[a-z\\-\\_\\.\\d]*\\.[a-z]{2,6}$','gi'
 
             evaluate = (result, value) ->
-                message = 'please enter a valid email address'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please enter a valid email address'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validatePhone: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^\\(?\\d{3}[\\)\\-\\.]?\\d{3}[\\-\\.]?\\d{4}(?:[xX]\\d+)?$','gi')
+        validatePhone: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'phone'
+            # validates United States phone number patterns
+            re = new RegExp '^\\(?\\d{3}[\\)\\-\\.]?\\d{3}[\\-\\.]?\\d{4}(?:[xX]\\d+)?$','gi'
 
             evaluate = (result, value) ->
-                message = 'please enter a valid phone number'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please enter a valid phone number'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateFullName: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^[a-z]+ [a-z\\.\\- ]+$','gi')
+        validateFullName: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'fullName'
+            # allows alpha . - 
+            re = new RegExp '^[a-z]+ [a-z\\.\\- ]+$','gi'
 
             evaluate = (result, value) ->
-                message = 'please enter your first and last name'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please enter your first and last name'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateAlpha: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^[a-z ]*','gi')
+        validateAlpha: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'alpha'
+            re = new RegExp '^[a-z ]*','gi'
 
             evaluate = (result, value) ->
-                message = 'please use alpha characters only'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please use alpha characters only'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateAlphaNum: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^[a-z\\d ]*$','gi')
+        validateAlphaNum: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'alphanum'
+            re = new RegExp '^[a-z\\d ]*$','gi'
 
             evaluate = (result, value) ->
-                message = 'please use alphanumeric characters only'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please use alphanumeric characters only'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateNoSpaces: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^\\S*$','gi')
+        validateNoSpaces: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'noSpaces'
+            re = new RegExp '^\\S*$','gi'
 
             evaluate = (result, value) ->
-                message = 'no spaces'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'no spaces'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateAlphaNumDash: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('^[a-z\\d- ]*$','gi')
+        validateAlphaNumDash: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'alphaNumDash'
+            re = new RegExp '^[a-z\\d- ]*$','gi'
 
             evaluate = (result, value) ->
-                message = 'please use alphanumeric and dashes only'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please use alphanumeric and dash characters only'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateAlphaNumUnderscore: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            # allows alphanumeric characters and underscores; no spaces
-            re = new RegExp('^[a-z\\d_]*$','gi')
+        validateAlphaNumUnderscore: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'alphaNumUnderscore'
+            # allows alphanumeric characters and underscores; no spaces; recommended for usernames
+            re = new RegExp '^[a-z\\d_]*$','gi'
 
             evaluate = (result, value) ->
-                message = 'please use alphanumeric and underscores only. no spaces'
-                if result and value == result
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
+                if result and value is result
+                    validate.status = 'success'
                 else
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
-                return status
+                    validate.status = 'danger'
+                    validate.message = 'please use alphanumeric and underscores only. no spaces'                    
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateNoTags: ->
-            that = $ @
-            status = null
-            value = $.trim that.val()
-            re = new RegExp('<[a-z]+.*>.*<\/[a-z]+>','i')
+        validateNoTags: (value) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'number'
+            re = new RegExp '<[a-z]+.*>.*<\/[a-z]+>','i'
 
-            evaluate = (result, value) ->
-                message = 'no html tags allowed'
+            evaluate = (result) ->                
                 if result
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = 'no html tags allowed'
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                result = $.trim(re.exec value)
-                status = evaluate(result, value)
+            if value?
+                result = $.trim re.exec value
+                validate.status = evaluate result, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateMaxValue: ->
+        validateMaxValue: (value) ->
             that = $ @
             max = that.data 'max-value'
             value = $.trim that.val()
 
             evaluate = (max, value) ->
-                message = "please enter a value that is less than #{max + 1}"
                 if value > max
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter a value that is less than #{max + 1}"                    
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(max, value)
+            if value?
+                validate.status = evaluate max, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateMinValue: ->
+        validateMinValue: (value) ->
             that = $ @
             min = that.data 'min-value'
             value = $.trim that.val()
 
-            evaluate = (min, value) ->
-                message = "please enter a value of at least #{min}"
+            evaluate = (min, value) ->                
                 if value < min
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter a value of at least #{min}"
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(min, value)
+            if value?
+                validate.status = evaluate(min, value)
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateBetweenValue: ->
+        validateBetweenValue: (value) ->
             that = $ @
             min = that.data 'min-value'
             max = that.data 'max-value'
             value = $.trim that.val()
 
-            evaluate = (min, max, value) ->
-                message = "please enter a value that is between #{min - 1} and #{max + 1}"
+            evaluate = (min, max, value) ->                
                 if (value < min) or (value > max)
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter a value that is between #{min - 1} and #{max + 1}"
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(min, max, value)
+            if value?
+                validate.status = evaluate min, max, value
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateMaxLength: ->
+        validateMaxLength: (value) ->
             that = $ @
             max = that.data 'max-length'
             value = $.trim that.val()
             length = value.length
 
-            evaluate = (max, length) ->
-                message = "please enter less than #{max + 1} characters"
+            evaluate = (max, length) ->                
                 if length > max
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter less than #{max + 1} characters"
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(max, length)
+            if value?
+                validate.status = evaluate max, length
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateMinLength: ->
+        validateMinLength: (value) ->
             that = $ @
             min = that.data 'min-length'
             value = $.trim that.val()
             length = value.length
 
-            evaluate = (min, length) ->
-                message = "please enter at least #{min} characters"
+            evaluate = (min, length) ->                
                 if length < min
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter at least #{min} characters"
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(min, length)
+            if value?
+                validate.status = evaluate min, length
 
-            drmForms.applyValidationClass.call(that, status)
+            validate
 
-        validateBetweenLength: ->
+        validateBetweenLength: (value) ->
             that = $ @
             min = that.data 'min-length'
             max = that.data 'max-length'
             value = $.trim that.val()
             length = value.length
 
-            evaluate = (min, max, length) ->
-                message = "please enter a value that is between #{min - 1} and #{max + 1} characters"
+            evaluate = (min, max, length) ->                
                 if (length < min) or (length > max)
-                    status = 'danger'
-                    drmForms.issueNotice.call(that, status, message)
+                    validate.status = 'danger'
+                    validate.message = "please enter a value that is between #{min - 1} and #{max + 1} characters"
                 else
-                    status = 'success'
-                    drmForms.removeNotice('danger', message)
-                return status
+                    validate.status = 'success'
+                validate.status
 
-            if value
-                status = evaluate(min, max, length)
+            if value?
+                validate.status = evaluate min, max, length
 
-            drmForms.applyValidationClass.call(that, status)
-    }
+            validate
 
-    drmForms.init()
+    new DrmForms()
 		
 ) jQuery
