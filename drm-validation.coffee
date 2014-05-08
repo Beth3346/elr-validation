@@ -3,6 +3,7 @@
 ###############################################################################
 ###
 jshint -W100
+Note: All validation is for United States based dates, times, phone, zip etc.
 ###
 "use strict"
 
@@ -18,6 +19,8 @@ jshint -W100
                 number: new RegExp "^\\-?\\d*\\.?\\d*"
                 url: new RegExp '^https?:\\/\\/[\\da-z\\.\\-]+[\\.a-z]{2,6}[\\/\\w/.\\-]*\\/?$','gi'
                 email: new RegExp '^[a-z][a-z\\-\\_\\.\\d]*@[a-z\\-\\_\\.\\d]*\\.[a-z]{2,6}$','gi'
+                # validates 77494 and 77494-3232
+                zip: new RegExp '^[0-9]{5}-[0-9]{4}$|^[0-9]{5}$'
                 # validates United States phone number patterns
                 phone: new RegExp '^\\(?\\d{3}[\\)\\-\\.]?\\d{3}[\\-\\.]?\\d{4}(?:[xX]\\d+)?$','gi'
                 # allows alpha . - and ensures that the user enters both a first and last name
@@ -29,13 +32,17 @@ jshint -W100
                 # allows alphanumeric characters and underscores; no spaces; recommended for usernames
                 alphaNumUnderscore: new RegExp '^[a-z\\d_]*$','gi'
                 noTags: new RegExp '<[a-z]+.*>.*<\/[a-z]+>','i'
-                date: new RegExp ''
-                creditCard: new RegExp ''
-                cvv: new RegExp ''
+                # mm/dd/yyyy
+                monthDayYear: new RegExp '(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\\d\\d'
+                # 00:00pm
+                time: new RegExp '^(?:[12][012]|[0]?[0-9]):[012345][0-9](?:am|pm)$', 'i'
+                # matched all major cc
+                creditCard: new RegExp '^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$'
+                cvv: new RegExp '^[0-9]{3,4}$'
 
             validateField = (value, validate) ->
                 if validate.message?
-                    self.issueNotice.call @, validate.status, validate.message, validate.issuer, self.speed
+                    self.issueNotice.call @, validate, self.speed
                 else
                     self.removeNotice.call @, validate.issuer, self.speed
                 self.removeValidationClass.call @, validate.status
@@ -46,162 +53,261 @@ jshint -W100
             body.on 'keyup', ':input.drm-valid-integer', ->
                 value = self.getValue.call @
                 validate = self.validateInteger value, patterns.integer
-                validateField.call @, value, validate
+                if validate?
+                    validateField.call @, value, validate
 
             body.on 'keyup', ':input.drm-valid-number', ->
                 value = self.getValue.call @
                 validate = self.validateNumber value, patterns.number
-                validateField.call @, value, validate
+                if validate?
+                    validateField.call @, value, validate
 
             body.on 'keyup', ':input.drm-valid-url', ->
                 value = self.getValue.call @
                 validate = self.validateURL value, patterns.url
-                validateField.call @, value, validate
+                if validate?
+                    validateField.call @, value, validate
 
             body.on 'keyup', ':input.drm-valid-phone', ->
                 value = self.getValue.call @
                 validate = self.validatePhone value, patterns.phone
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-email', ->
                 value = self.getValue.call @
                 validate = self.validateEmail value, patterns.email
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-full-name', ->
                 value = self.getValue.call @
                 validate = self.validateFullName value, patterns.fullName
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-alpha', ->
                 value = self.getValue.call @
                 validate = self.validateAlpha value, patterns.alpha
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-alphanum', ->
                 value = self.getValue.call @
                 validate = self.validateAlphaNum value, patterns.alphaNum
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-alphadash', ->
                 value = self.getValue.call @
                 validate = self.validateAlphaNumDash value, patterns.alphaNumDash
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-alpha-num-underscore', ->
                 value = self.getValue.call @
                 validate = self.validateAlphaNumUnderscore value, patterns.alphaNumUnderscore
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-no-spaces', ->
                 value = self.getValue.call @
                 validate = self.validateNoSpaces value, patterns.noSpaces
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input.drm-valid-no-tags', ->
                 value = self.getValue.call @
                 validate = self.validateNoTags value, patterns.noTags
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input.drm-valid-credit-card', ->
+                value = self.getValue.call @
+                validate = self.validateCreditCard value, patterns.creditCard
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input.drm-valid-cvv', ->
+                value = self.getValue.call @
+                validate = self.validateCvv value, patterns.cvv
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input.drm-valid-zip', ->
+                value = self.getValue.call @
+                validate = self.validateZip value, patterns.zip
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input.drm-valid-month-day-year', ->
+                value = self.getValue.call @
+                validate = self.validateMonthDayYear value, patterns.monthDayYear
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input.drm-valid-time', ->
+                value = self.getValue.call @
+                validate = self.validateTime value, patterns.time
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-max-value]:not([data-min-value])', ->
                 value = self.getValue.call @
                 validate = self.validateMaxValue.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-min-value]:not([data-max-value])', ->
                 value = self.getValue.call @
                 validate = self.validateMinValue.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-max-length]:not([data-min-length])', ->
                 value = self.getValue.call @
                 validate = self.validateMaxLength.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-min-length]:not([data-max-length])', ->
                 value = self.getValue.call @
                 validate = self.validateMinLength.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-min-value][data-max-value]', ->
                 value = self.getValue.call @
                 validate = self.validateBetweenValue.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
             body.on 'keyup', ':input[data-min-length][data-max-length]', ->
                 value = self.getValue.call @
                 validate = self.validateBetweenLength.call @, value
-                validateField.call @, value, validate            
+                if validate?
+                    validateField.call @, value, validate
             
-            body.on 'keyup', ':input', self.trackLength
+            body.on 'keyup', ':input[data-equal]', ->
+                value = self.getValue.call @
+                validate = self.validateEqual.call @, value
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input[data-not-equal]', ->
+                value = self.getValue.call @
+                validate = self.validateNotEqual.call @, value
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input[data-in-list]', ->
+                value = self.getValue.call @
+                validate = self.validateInList.call @, value
+                if validate?
+                    validateField.call @, value, validate
+            
+            body.on 'keyup', ':input[data-not-list]', ->
+                value = self.getValue.call @
+                validate = self.validateNotList.call @, value
+                if validate?
+                    validateField.call @, value, validate
+
+            body.on 'keyup', ":input[type='text'], :input[type='url'], :input[type='email'], :input[type='password'], :input[type='tel'], textarea", ->
+                value = self.getValue.call @
+                validate = self.trackLength.call @, value
+                if validate.message?
+                    self.issueNotice.call @, validate, self.speed
+                else
+                    self.removeNotice.call @, validate.issuer, self.speed
 
             # validate empty fields
             
             body.on 'blur', '[required]', -> 
                 value = self.getValue.call @
-                validate = self.validateRequired value
-                validateField.call @, value, validate
+                validate = self.validateRequired.call @, value
+                if validate?
+                    validateField.call @, value, validate
 
             body.on 'blur', ':input:not([required])', ->
                 value = self.getValue.call @
                 if not value
                     self.removeValidationClass.call @
                     self.removeAllNotices.call @, self.speed
-
-        trackLength: ->
-            that = $ @
-            value = $.trim that.val()
-            length = value.length
-            lengthNotice = that.nextUntil ':input', '.form-length-notice'
             
-            createMessage = (length) ->
-                message = if length is 1 then "#{length} character" else "#{length} characters"
-                message
+            body.on 'blur', ':input[data-required-with]', ->
+                value = self.getValue.call @
+                validate = self.validateRequiredWith.call @, value
+                if validate?
+                    validateField.call @, value, validate
 
-            if lengthNotice.length is 0
-                message = createMessage length
-                lengthNotice = $ '<p></p>',
-                    text: message
-                    class: 'form-length-notice'
-                
-                lengthNotice.hide().insertAfter(that).show()
-            else if length is 0
-                lengthNotice.remove()
-            else
-                message = createMessage length
-                lengthNotice.text message
+        trackLength: (value) ->
+            that = $ @
+            validate =
+                status: 'length'
+                message: null
+                issuer: 'length-notice'
+            if value?
+                length = value.length
+                validate.message = if length is 1 then "#{length} character" else "#{length} characters"
+            validate
 
         getValue: ->
             value = $.trim $(@).val()
 
             if value.length > 0
-                return value
-            else
-                value = null
                 value
+            else
+                null
 
-        issueNotice: (status, message, issuer, speed) ->
+        issueNotice: (validate, speed) ->
             that = $ @
-            notice = $ "p.form-#{status}-notice:contains(#{message})"
+            lengthNotice = that.nextUntil ':input', "p.form-length-notice"
+            notice = that.nextUntil ':input', "p.form-#{validate.status}-notice:contains(#{validate.message})"
+
+            addNotice = (item) ->
+                if that.css('float') isnt 'none'
+                    noticeHolder = that.parent 'div.form-notice-holder'
+                    if noticeHolder.length is 0
+                        that.wrap('<div class="form-notice-holder"></div>').focus()
+                        noticeHolder = that.parent 'div.form-notice-holder'
+                        item.hide().appendTo(noticeHolder).slideDown speed
+                    else
+                        item.hide().appendTo(noticeHolder).slideDown speed
+                    noticeHolder.children().css 'float', 'none'
+                else
+                    item.hide().insertAfter(that).slideDown speed
             
-            if notice.length is 0
+            if validate.status is 'length' and lengthNotice.length is 0
                 notice = $ '<p></p>',
-                    text: message,
-                    class: "form-#{status}-notice"
-                    'data-issuer': issuer
+                    text: validate.message,
+                    class: "form-#{validate.status}-notice form-notice"
+                    'data-issuer': validate.issuer
                 
-                notice.hide().insertAfter(that).slideDown speed
+                addNotice notice
+
+            else if validate.status is 'length'
+                lengthNotice.text validate.message
+
+            else if notice.length is 0
+                notice = $ '<p></p>',
+                    text: validate.message,
+                    class: "form-#{validate.status}-notice form-notice"
+                    'data-issuer': validate.issuer
+                
+                addNotice notice
 
         removeNotice: (issuer, speed) ->
-            notice = $ "p[data-issuer='#{issuer}']"
+            self = $ @
+            notice = self.nextUntil ':input', "p[data-issuer='#{issuer}']"
 
             if notice.length isnt 0
                 notice.slideUp speed, ->
-                    $(@).remove()
+                    that = $ @
+                    that.remove()
 
         removeAllNotices: (speed) ->
             that = $ @
-            notices = that.nextUntil ':input','p.form-success-notice, p.form-warning-notice, p.form-danger-notice'
+            notices = that.nextUntil ':input','p.form-notice'
 
             if notices.length isnt 0
                 notices.slideUp speed, -> 
@@ -239,7 +345,7 @@ jshint -W100
                 message: null
                 issuer: 'required'
 
-            if value.length is 0
+            if !value
                 validate.message = 'this field is required'
                 validate.status = 'danger'
             
@@ -263,9 +369,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateNumber: (value, pattern) ->
             validate =
@@ -285,9 +389,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value      
-
-            validate
+                evaluate result, value
 
         validateURL: (value, pattern) ->
             validate =
@@ -307,9 +409,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value       
-
-            validate
+                evaluate result, value
 
         validateEmail: (value, pattern) ->
             validate =
@@ -329,9 +429,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validatePhone: (value, pattern) ->
             validate =
@@ -351,9 +449,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateFullName: (value, pattern) ->
             validate =
@@ -373,9 +469,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateAlpha: (value, pattern) ->
             validate =
@@ -395,9 +489,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateAlphaNum: (value, pattern) ->
             validate =
@@ -417,9 +509,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateNoSpaces: (value, pattern) ->
             validate =
@@ -439,9 +529,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateAlphaNumDash: (value, pattern) ->
             validate =
@@ -461,9 +549,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateAlphaNumUnderscore: (value, pattern) ->
             validate =
@@ -483,9 +569,7 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateNoTags: (value, pattern) ->
             validate =
@@ -505,11 +589,9 @@ jshint -W100
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
+                evaluate result, value
 
-            validate
-
-        validateDate: (value, pattern) ->
+        validateMonthDayYear: (value, pattern) ->
             validate =
                 status: null
                 message: null
@@ -517,19 +599,37 @@ jshint -W100
 
             evaluate = (result) ->                
                 if result
-                    validate.status = 'danger'
-                    validate.message = 'please provide a valid date'
-                else
                     validate.message = null
                     validate.status = 'success'
+                else
+                    validate.status = 'danger'
+                    validate.message = 'please provide a valid date'
                 validate
 
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
+                evaluate result, value
 
-            validate
+        validateTime: (value, pattern) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'time'
+
+            evaluate = (result) ->                
+                if result
+                    validate.message = null
+                    validate.status = 'success'
+                else
+                    validate.status = 'danger'
+                    validate.message = 'please provide a valid time'
+                validate
+
+            if value?
+                pattern = new RegExp pattern
+                result = $.trim pattern.exec value
+                evaluate result, value
 
         validateCreditCard: (value, pattern) ->
             validate =
@@ -539,19 +639,17 @@ jshint -W100
 
             evaluate = (result) ->                
                 if result
-                    validate.status = 'danger'
-                    validate.message = 'please provide a valid credit card number'
-                else
                     validate.message = null
                     validate.status = 'success'
+                else
+                    validate.status = 'danger'
+                    validate.message = 'please provide a valid credit card number'
                 validate
 
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
-
-            validate
+                evaluate result, value
 
         validateCvv: (value, pattern) ->
             validate =
@@ -561,19 +659,37 @@ jshint -W100
 
             evaluate = (result) ->                
                 if result
-                    validate.status = 'danger'
-                    validate.message = 'please provide a valid cvv'
-                else
                     validate.message = null
                     validate.status = 'success'
+                else
+                    validate.status = 'danger'
+                    validate.message = 'please provide a valid cvv'
                 validate
 
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                validate = evaluate result, value
+                evaluate result, value
 
-            validate
+        validateZip: (value, pattern) ->
+            validate =
+                status: null
+                message: null
+                issuer: 'zip'
+
+            evaluate = (result) ->                
+                if result
+                    validate.message = null
+                    validate.status = 'success'
+                else
+                    validate.status = 'danger'
+                    validate.message = 'please provide a valid zip code'
+                validate
+
+            if value?
+                pattern = new RegExp pattern
+                result = $.trim pattern.exec value
+                evaluate result, value
 
         validateEqual: (value) ->
             that = $ @
@@ -593,9 +709,7 @@ jshint -W100
                 validate
 
             if value?
-                validate = evaluate equal, value
-
-            validate
+                evaluate equal, value
 
         validateNotEqual: (value) ->
             that = $ @
@@ -615,60 +729,61 @@ jshint -W100
                 validate
 
             if value?
-                validate = evaluate notEqual, value
-
-            validate
+                evaluate notEqual, value
 
         validateCheckbox: () ->
 
         validateRadio: () ->
 
+        validateSelect: () ->
+
         validateInList: (value) ->
             that = $ @
             list = that.data 'in-list'
+            listItems = []
+            listItems = list.split ','
+
             validate =
                 status: null
                 message: null
                 issuer: 'inList'
 
-            parseList = () ->
-                # doSomething
-
-            evaluate = (list, value) ->
-                if value == list
+            evaluate = (listItems, value) ->
+                if $.inArray(value, listItems) is -1
+                    list = listItems.join ', '
                     validate.status = 'danger'
-                    validate.message = "this field cannot be #{list}"                   
+                    validate.message = "this field should be one of these: #{list}"                   
                 else
                     validate.message = null
                     validate.status = 'success'
                 validate
 
             if value?
-                validate = evaluate list, value
-
-            validate
+                evaluate listItems, value
 
         validateNotList: (value) ->
             that = $ @
-            notEqual = that.data 'not-equal'
+            list = that.data 'not-list'
+            listItems = []
+            listItems = list.split ','
+
             validate =
                 status: null
                 message: null
-                issuer: 'not-equal'
+                issuer: 'notList'
 
-            evaluate = (notEqual, value) ->
-                if value == notEqual
+            evaluate = (listItems, value) ->
+                if $.inArray(value, listItems) isnt -1
+                    list = listItems.join ', '
                     validate.status = 'danger'
-                    validate.message = "this field cannot be #{notEqual}"                   
+                    validate.message = "this field cannot be one of these: #{list}"                   
                 else
                     validate.message = null
                     validate.status = 'success'
                 validate
 
             if value?
-                validate = evaluate notEqual, value
-
-            validate
+                evaluate listItems, value
 
         validateRequiredWith: (value) ->
             that = $ @
@@ -678,19 +793,37 @@ jshint -W100
                 message: null
                 issuer: 'not-equal'
 
-            evaluate = (requiredWith, value) ->
-                if value == requiredWith
-                    validate.status = 'danger'
-                    validate.message = "this field is required with #{requiredWith}"                   
-                else
+            if requiredWith.search(':') isnt -1
+                requiredWith = requiredWith.split ':'
+                fieldID = requiredWith[0]
+                fieldValue = requiredWith[1]
+            else
+                fieldID = requiredWith
+
+            evaluate = (value, fieldID, fieldValue) ->
+                field = $ "##{fieldID}"
+                requiredFieldValue = $.trim field.val()
+
+                checkValue = ->
+                    if not value
+                        validate.status = 'danger'
+                        validate.message = "this field is required with #{fieldID}"
+                    else
+                        validate.message = null
+                        validate.status = 'success'
+                    validate
+
+                if fieldValue? and (requiredFieldValue is fieldValue)
+                    validate = checkValue()
+                else if requiredFieldValue.length > 0 and (not fieldValue?)
+                    validate = checkValue()
+                else if requiredFieldValue.length == 0
                     validate.message = null
                     validate.status = 'success'
+                
                 validate
 
-            if value?
-                validate = evaluate requiredWith, value
-
-            validate
+            evaluate value, fieldID, fieldValue
 
         validateMaxValue: (value) ->
             that = $ @
@@ -710,9 +843,7 @@ jshint -W100
                 validate
 
             if value?
-                validate = evaluate max, value
-
-            validate
+                evaluate max, value
 
         validateMinValue: (value) ->
             that = $ @
@@ -732,9 +863,7 @@ jshint -W100
                 validate
 
             if value?
-                validate = evaluate(min, value)
-
-            validate
+                evaluate min, value
 
         validateBetweenValue: (value) ->
             that = $ @
@@ -755,9 +884,7 @@ jshint -W100
                 validate
 
             if value?
-                validate = evaluate min, max, value
-
-            validate
+                evaluate min, max, value
 
         validateMaxLength: (value) ->
             that = $ @
@@ -778,9 +905,7 @@ jshint -W100
 
             if value?
                 length = value.length
-                validate = evaluate max, length
-
-            validate
+                evaluate max, length
 
         validateMinLength: (value) ->
             that = $ @
@@ -801,9 +926,7 @@ jshint -W100
 
             if value?
                 length = value.length
-                validate = evaluate min, length
-
-            validate
+                evaluate min, length
 
         validateBetweenLength: (value) ->
             that = $ @
@@ -825,9 +948,7 @@ jshint -W100
 
             if value?
                 length = value.length
-                validate = evaluate min, max, length
-
-            validate
+                evaluate min, max, length
 
     new DrmForms()
 		
