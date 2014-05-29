@@ -16,24 +16,24 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             patterns =
                 # an integer can be negative or positive and can include one comma separator followed by exactly 3 numbers
                 integer: new RegExp "^\\-?\\d*"
-                number: new RegExp "^\\-?\\d*\\.?\\d*"
-                url: new RegExp '^https?:\\/\\/[\\da-z\\.\\-]+[\\.a-z]{2,6}[\\/\\w/.\\-]*\\/?$','gi'
-                email: new RegExp '^[a-z][a-z\\-\\_\\.\\d]*@[a-z\\-\\_\\.\\d]*\\.[a-z]{2,6}$','gi'
+                number: new RegExp "^(?:\\-?\\d+|\\d*)(?:\\.?\\d+|\\d)$"
+                url: new RegExp '^https?:\\/\\/[\\da-z\\.\\-]+[\\.a-z]{2,6}[\\/\\w/.\\-]*\\/?$','i'
+                email: new RegExp '^[a-z][a-z\\-\\_\\.\\d]*@[a-z\\-\\_\\.\\d]*\\.[a-z]{2,6}$','i'
                 # validates 77494 and 77494-3232
                 zip: new RegExp '^[0-9]{5}-[0-9]{4}$|^[0-9]{5}$'
                 # validates United States phone number patterns
-                phone: new RegExp '^\\(?\\d{3}[\\)\\-\\.]?\\d{3}[\\-\\.]?\\d{4}(?:[xX]\\d+)?$','gi'
+                phone: new RegExp '^\\(?\\d{3}[\\)\\-\\.]?\\d{3}[\\-\\.]?\\d{4}(?:[xX]\\d+)?$','i'
                 # allows alpha . - and ensures that the user enters both a first and last name
-                fullName: new RegExp '^[a-z]+ [a-z\\.\\- ]+$','gi'
-                alpha: new RegExp '^[a-z ]*','gi'
-                alphaNum: new RegExp '^[a-z\\d ]*$','gi'
-                noSpaces: new RegExp '^\\S*$','gi'
-                alphaNumDash: new RegExp '^[a-z\\d- ]*$','gi'
+                fullName: new RegExp '^[a-z]+ [a-z\\.\\- ]+$','i'
+                alpha: new RegExp '^[a-z \\-]*','i'
+                alphaNum: new RegExp '^[a-z\\d ]*$','i'
+                noSpaces: new RegExp '^\\S*$','i'
+                alphaNumDash: new RegExp '^[a-z\\d- ]*$','i'
                 # allows alphanumeric characters and underscores; no spaces; recommended for usernames
-                alphaNumUnderscore: new RegExp '^[a-z\\d_]*$','gi'
+                alphaNumUnderscore: new RegExp '^[a-z\\d_]*$','i'
                 noTags: new RegExp '<[a-z]+.*>.*<\/[a-z]+>','i'
                 # mm/dd/yyyy
-                monthDayYear: new RegExp '(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\\d\\d'
+                monthDayYear: new RegExp '^(?:[0]?[1-9]|[1][012]|[1-9])[-\/.](?:[0]?[1-9]|[12][0-9]|[3][01])[-\/.][0-9]{4}$'
                 # 00:00pm
                 time: new RegExp '^(?:[12][012]|[0]?[0-9]):[012345][0-9](?:am|pm)$', 'i'
                 # matched all major cc
@@ -254,10 +254,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
         getValue: ->
             value = $.trim $(@).val()
 
-            if value.length > 0
-                value
-            else
-                null
+            if value.length > 0 then value else null
 
         issueNotice: (validate, speed) ->
             that = $ @
