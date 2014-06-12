@@ -4,11 +4,13 @@
 ###
 jshint -W100
 Note: All validation is for United States based dates, times, phone, zip etc.
+
+Need to add custom messages
 ###
 "use strict"
 
 ( ($) ->
-    class DrmForms
+    class DrmValidation
         constructor: (@speed = 300) ->
             self = @
             body = $ 'body'
@@ -261,7 +263,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             lengthNotice = that.nextUntil ':input', "p.form-length-notice"
             notice = that.nextUntil ':input', "p.form-#{validate.status}-notice:contains(#{validate.message})"
 
-            addNotice = (item) ->
+            _addNotice = (item) ->
                 if that.css('float') isnt 'none'
                     noticeHolder = that.parent 'div.form-notice-holder'
                     if noticeHolder.length is 0
@@ -280,7 +282,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                     class: "form-#{validate.status}-notice form-notice"
                     'data-issuer': validate.issuer
                 
-                addNotice notice
+                _addNotice notice
 
             else if validate.status is 'length'
                 lengthNotice.text validate.message
@@ -291,7 +293,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                     class: "form-#{validate.status}-notice form-notice"
                     'data-issuer': validate.issuer
                 
-                addNotice notice
+                _addNotice notice
 
         removeNotice: (issuer, speed) ->
             self = $ @
@@ -354,7 +356,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'integer'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -366,7 +368,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateNumber: (value, pattern) ->
             validate =
@@ -374,7 +376,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'number'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -386,7 +388,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateURL: (value, pattern) ->
             validate =
@@ -394,7 +396,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'url'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -406,7 +408,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateEmail: (value, pattern) ->
             validate =
@@ -414,7 +416,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'email'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -426,7 +428,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validatePhone: (value, pattern) ->
             validate =
@@ -434,7 +436,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'phone'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -446,7 +448,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateFullName: (value, pattern) ->
             validate =
@@ -454,7 +456,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'fullName'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -466,7 +468,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateAlpha: (value, pattern) ->
             validate =
@@ -474,7 +476,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'alpha'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -486,7 +488,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateAlphaNum: (value, pattern) ->
             validate =
@@ -494,7 +496,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'alphanum'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -506,7 +508,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateNoSpaces: (value, pattern) ->
             validate =
@@ -514,7 +516,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'noSpaces'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -526,7 +528,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateAlphaNumDash: (value, pattern) ->
             validate =
@@ -534,7 +536,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'alphaNumDash'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -546,7 +548,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateAlphaNumUnderscore: (value, pattern) ->
             validate =
@@ -554,7 +556,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'alphaNumUnderscore'
 
-            evaluate = (result, value) ->
+            _evaluate = (result, value) ->
                 if result and value is result
                     validate.message = null
                     validate.status = 'success'
@@ -566,7 +568,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateNoTags: (value, pattern) ->
             validate =
@@ -574,7 +576,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'number'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.status = 'danger'
                     validate.message = 'no html tags allowed'
@@ -586,7 +588,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateMonthDayYear: (value, pattern) ->
             validate =
@@ -594,7 +596,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'date'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.message = null
                     validate.status = 'success'
@@ -606,7 +608,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateTime: (value, pattern) ->
             validate =
@@ -614,7 +616,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'time'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.message = null
                     validate.status = 'success'
@@ -626,7 +628,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateCreditCard: (value, pattern) ->
             validate =
@@ -634,7 +636,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'creditCard'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.message = null
                     validate.status = 'success'
@@ -646,7 +648,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateCvv: (value, pattern) ->
             validate =
@@ -654,7 +656,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'cvv'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.message = null
                     validate.status = 'success'
@@ -666,7 +668,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateZip: (value, pattern) ->
             validate =
@@ -674,7 +676,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'zip'
 
-            evaluate = (result) ->                
+            _evaluate = (result) ->                
                 if result
                     validate.message = null
                     validate.status = 'success'
@@ -686,7 +688,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             if value?
                 pattern = new RegExp pattern
                 result = $.trim pattern.exec value
-                evaluate result, value
+                _evaluate result, value
 
         validateEqual: (value) ->
             that = $ @
@@ -696,7 +698,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'equal'
 
-            evaluate = (equal, value) ->
+            _evaluate = (equal, value) ->
                 if value == equal  
                     validate.message = null
                     validate.status = 'success'                
@@ -706,7 +708,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate equal, value
+                _evaluate equal, value
 
         validateNotEqual: (value) ->
             that = $ @
@@ -716,7 +718,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'notEqual'
 
-            evaluate = (notEqual, value) ->
+            _evaluate = (notEqual, value) ->
                 if value == notEqual
                     validate.status = 'danger'
                     validate.message = "this field cannot be #{notEqual}"                   
@@ -726,7 +728,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate notEqual, value
+                _evaluate notEqual, value
 
         validateCheckbox: () ->
 
@@ -745,7 +747,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'inList'
 
-            evaluate = (listItems, value) ->
+            _evaluate = (listItems, value) ->
                 if $.inArray(value, listItems) is -1
                     list = listItems.join ', '
                     validate.status = 'danger'
@@ -756,7 +758,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate listItems, value
+                _evaluate listItems, value
 
         validateNotList: (value) ->
             that = $ @
@@ -769,7 +771,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'notList'
 
-            evaluate = (listItems, value) ->
+            _evaluate = (listItems, value) ->
                 if $.inArray(value, listItems) isnt -1
                     list = listItems.join ', '
                     validate.status = 'danger'
@@ -780,7 +782,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate listItems, value
+                _evaluate listItems, value
 
         validateRequiredWith: (value) ->
             that = $ @
@@ -797,7 +799,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
             else
                 fieldID = requiredWith
 
-            evaluate = (value, fieldID, fieldValue) ->
+            _evaluate = (value, fieldID, fieldValue) ->
                 field = $ "##{fieldID}"
                 requiredFieldValue = $.trim field.val()
 
@@ -820,7 +822,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 
                 validate
 
-            evaluate value, fieldID, fieldValue
+            _evaluate value, fieldID, fieldValue
 
         validateMaxValue: (value) ->
             that = $ @
@@ -830,7 +832,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'maxValue'
 
-            evaluate = (max, value) ->
+            _evaluate = (max, value) ->
                 if value > max
                     validate.status = 'danger'
                     validate.message = "please enter a value that is less than #{max + 1}"                    
@@ -840,7 +842,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate max, value
+                _evaluate max, value
 
         validateMinValue: (value) ->
             that = $ @
@@ -850,7 +852,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'minValue'
 
-            evaluate = (min, value) ->                
+            _evaluate = (min, value) ->                
                 if value < min
                     validate.status = 'danger'
                     validate.message = "please enter a value of at least #{min}"
@@ -860,7 +862,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate min, value
+                _evaluate min, value
 
         validateBetweenValue: (value) ->
             that = $ @
@@ -871,7 +873,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'betweenValue'
 
-            evaluate = (min, max, value) ->                
+            _evaluate = (min, max, value) ->                
                 if (value < min) or (value > max)
                     validate.status = 'danger'
                     validate.message = "please enter a value that is between #{min - 1} and #{max + 1}"
@@ -881,7 +883,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 validate
 
             if value?
-                evaluate min, max, value
+                _evaluate min, max, value
 
         validateMaxLength: (value) ->
             that = $ @
@@ -891,7 +893,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'maxLength'
 
-            evaluate = (max, length) ->                
+            _evaluate = (max, length) ->                
                 if length > max
                     validate.status = 'danger'
                     validate.message = "please enter less than #{max + 1} characters"
@@ -902,7 +904,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
 
             if value?
                 length = value.length
-                evaluate max, length
+                _evaluate max, length
 
         validateMinLength: (value) ->
             that = $ @
@@ -912,7 +914,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'minLength'
 
-            evaluate = (min, length) ->                
+            _evaluate = (min, length) ->                
                 if length < min
                     validate.status = 'danger'
                     validate.message = "please enter at least #{min} characters"
@@ -923,7 +925,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
 
             if value?
                 length = value.length
-                evaluate min, length
+                _evaluate min, length
 
         validateBetweenLength: (value) ->
             that = $ @
@@ -934,7 +936,7 @@ Note: All validation is for United States based dates, times, phone, zip etc.
                 message: null
                 issuer: 'betweenLength'
 
-            evaluate = (min, max, length) ->                
+            _evaluate = (min, max, length) ->                
                 if (length < min) or (length > max)
                     validate.status = 'danger'
                     validate.message = "please enter a value that is between #{min - 1} and #{max + 1} characters"
@@ -945,8 +947,8 @@ Note: All validation is for United States based dates, times, phone, zip etc.
 
             if value?
                 length = value.length
-                evaluate min, max, length
+                _evaluate min, max, length
 
-    new DrmForms()
+    new DrmValidation()
 		
 ) jQuery
