@@ -1,5 +1,7 @@
 # elr-validation 
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Beth3346/elr-validation.svg)](https://greenkeeper.io/)
+
 a basic content validation
 
 ## Installation
